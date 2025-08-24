@@ -1,0 +1,26 @@
+# アンケート分析設定ファイル
+
+# データ設定
+data:
+  raw_data_path: "data/raw/sprint_data - dummy.csv"
+  target_column: "intention"
+  output_dir: "output"
+
+# 単変量分析設定
+univariate_analysis:
+  min_samples: 10
+  correlation_threshold: 0.3
+  auc_threshold: 0.6
+
+# 決定木設定
+decision_tree:
+  max_depth: 2
+  min_samples_split: 5
+  min_samples_leaf: 3
+  random_state: 42
+
+# 出力設定
+output:
+  tables_dir: "output/tables"
+  reports_dir: "output/reports"
+  file_formats: ["csv", "json", "md"]
