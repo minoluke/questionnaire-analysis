@@ -17,8 +17,8 @@ def main():
     print("=== データ前処理を開始します ===")
     
     # 設定
-    input_file = "data/raw/sprint_data - dummy.csv"
-    output_file = "data/processed/preprocessed_data.csv"
+    input_file = "data/raw/sprint_data - data.csv"
+    output_file = "data/processed/preprocessed_data_real.csv"
     target_column = "利用意向"
     
     # 前処理クラスの初期化

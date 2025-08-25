@@ -19,7 +19,7 @@ def main():
     print("=== 簡易ルール分析（1本のif-else）を開始します ===")
     
     # 前処理済みデータの読み込み
-    input_file = "data/processed/preprocessed_data.csv"
+    input_file = "data/processed/preprocessed_data_real.csv"
     ranking_file = "output/tables/univariate_ranking_table.csv"
     table_file = "output/tables/simple_rule_table.csv"
     report_file = "output/reports/simple_rule_report.md"
@@ -51,25 +51,12 @@ def main():
         print(f"目的変数 '{target_column}' が見つかりません")
         return
     
-    # 使用する特徴量の選択
-    # READMEの例では「自由資産率」と「平均月収」を使用
-    target_features = ["月収に対する自由資産率", "平均月収"]
-    
-    # 実際のデータに存在する特徴量を確認
-    available_features = []
-    for feature in target_features:
-        if feature in data.columns:
-            available_features.append(feature)
-        else:
-            print(f"警告: 特徴量 '{feature}' が見つかりません")
-    
-    if len(available_features) < 2:
-        print("使用可能な特徴量が不足しています。上位の数値型特徴量を使用します。")
-        # 上位の数値型特徴量を使用
-        available_features = ranking_df[
-            (ranking_df['type'] == 'numerical') & 
-            (ranking_df['feature'] != target_column)
-        ].head(4)['feature'].tolist()
+    # 使用する特徴量の選択（上位4つの数値型特徴量を使用）
+    print("上位4つの数値型特徴量の全ペア組み合わせで分析します。")
+    available_features = ranking_df[
+        (ranking_df['type'] == 'numerical') & 
+        (ranking_df['feature'] != target_column)
+    ].head(4)['feature'].tolist()
     
     print(f"\n=== 使用する特徴量 ===")
     print(f"特徴量: {available_features}")
@@ -189,14 +176,37 @@ if (特徴量1 > t1) AND (特徴量2 > t2) then 利用意向=あり else なし
 - **解釈**: 不明
 """
     
+    # 上位ルールの詳細
+    rules_summary = analyzer.get_rule_summary()
+    top_rules = rules_summary.get('top_rules', []) if rules_summary else []
+    
+    report += f"""
+## 発見されたルール
+
+### 上位5個のルール
+
+"""
+    
+    # 上位5個のルールを追加
+    for i, rule in enumerate(top_rules[:5], 1):
+        report += f"""
+#### {i}. {rule['rule_condition']}
+- **F1スコア**: {rule['f1_score']:.3f}
+- **ルール内利用意向率**: {rule['rule_intention_rate']:.1%} ({rule['rule_samples']}件)
+- **ルール外利用意向率**: {rule['other_intention_rate']:.1%} ({rule['other_samples']}件)
+- **精度**: {rule['accuracy']:.3f}
+- **Lift**: {rule['lift']:.3f}
+"""
+
     # 最良ルールの詳細
     report += f"""
-## 最良ルール
+
+## 最良ルール詳細
 
 ### 最終ルール
 **{best_rule['rule_condition']}**
 
-### 数字
+### 性能指標
 
 **ルール内の利用意向率** = {best_rule['rule_intention_rate']:.1%} ({best_rule['rule_samples']}件)
 

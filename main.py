@@ -20,8 +20,8 @@ def main():
     print("=== アンケート分析を開始します ===")
     
     # データファイルのパス（前処理済みデータを優先）
-    raw_data_file = "data/raw/sprint_data - dummy.csv"
-    processed_data_file = "data/processed/preprocessed_data.csv"
+    raw_data_file = "data/raw/sprint_data - data.csv"
+    processed_data_file = "data/processed/preprocessed_data_real.csv"
     
     # 前処理済みデータがある場合はそれを使用、なければ生データを使用
     if os.path.exists(processed_data_file):
@@ -44,7 +44,7 @@ def main():
     print(f"列名: {list(data.columns)}")
     
     # 目的変数の確認（利用意向）
-    target_column = 'intention'
+    target_column = '利用意向'
     if target_column not in data.columns:
         print(f"目的変数 '{target_column}' が見つかりません")
         print("利用可能な列名を確認してください")

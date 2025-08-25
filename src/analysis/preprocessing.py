@@ -181,10 +181,9 @@ class DataPreprocessor:
         if all(col in data.columns for col in ['最高支出', '最低支出']):
             data['支出変動率'] = (data['最高支出'] - data['最低支出']) / ((data['最高支出'] + data['最低支出']) / 2)
         
-        # 業種のダミー変数化
+        # 業種/業態列を削除
         if '業種/業態' in data.columns:
-            industry_dummies = pd.get_dummies(data['業種/業態'], prefix='業種')
-            data = pd.concat([data, industry_dummies], axis=1)
+            data = data.drop('業種/業態', axis=1)
         
         print("特徴量作成完了")
         return data

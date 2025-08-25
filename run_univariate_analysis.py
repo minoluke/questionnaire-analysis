@@ -80,8 +80,8 @@ def generate_markdown_report(ranking_df: pd.DataFrame, data: pd.DataFrame, targe
 - **平均相関係数（絶対値）**: {numerical_features['correlation'].abs().mean():.3f}
 
 ### カテゴリ型特徴量 ({len(categorical_features)}個)
-- **平均Cramér's V**: {categorical_features['cramer_v'].mean():.3f}
-- **平均最大率差**: {categorical_features['max_rate_diff'].mean():.1%}
+{f"- **平均Cramér's V**: {categorical_features['cramer_v'].mean():.3f}" if not categorical_features.empty else ""}
+{f"- **平均最大率差**: {categorical_features['max_rate_diff'].mean():.1%}" if not categorical_features.empty else "- なし"}
 
 ## 重要な発見
 
@@ -120,7 +120,7 @@ def main():
     print("=== 単変量ランキング分析を開始します ===")
     
     # 前処理済みデータの読み込み
-    input_file = "data/processed/preprocessed_data.csv"
+    input_file = "data/processed/preprocessed_data_real.csv"
     table_file = "output/tables/univariate_ranking_table.csv"
     report_file = "output/reports/univariate_ranking_report.md"
     
@@ -217,6 +217,8 @@ def main():
     if not categorical_features.empty:
         print(f"\nカテゴリ型特徴量の平均Cramér's V: {categorical_features['cramer_v'].mean():.3f}")
         print(f"カテゴリ型特徴量の平均最大率差: {categorical_features['max_rate_diff'].mean():.3f}")
+    else:
+        print("\nカテゴリ型特徴量: なし")
 
 if __name__ == "__main__":
     main()
