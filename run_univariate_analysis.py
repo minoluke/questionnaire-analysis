@@ -115,14 +115,17 @@ def generate_markdown_report(ranking_df: pd.DataFrame, data: pd.DataFrame, targe
     
     return report
 
-def main():
+def main(input_file=None, table_file=None, report_file=None):
     """単変量分析メイン実行関数"""
     print("=== 単変量ランキング分析を開始します ===")
     
-    # 前処理済みデータの読み込み
-    input_file = "data/processed/preprocessed_data_real.csv"
-    table_file = "output/tables/univariate_ranking_table.csv"
-    report_file = "output/reports/univariate_ranking_report.md"
+    # デフォルトパスの設定
+    if input_file is None:
+        input_file = "data/processed/preprocessed_data_real.csv"
+    if table_file is None:
+        table_file = "output/tables/univariate_ranking_table.csv"
+    if report_file is None:
+        report_file = "output/reports/univariate_ranking_report.md"
     
     print(f"入力ファイル: {input_file}")
     print(f"テーブル出力: {table_file}")
@@ -221,4 +224,12 @@ def main():
         print("\nカテゴリ型特徴量: なし")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) >= 4:
+        main(sys.argv[1], sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 3:
+        main(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()

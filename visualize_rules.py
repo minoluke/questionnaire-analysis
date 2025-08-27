@@ -10,34 +10,81 @@ import matplotlib.patches as patches
 from pathlib import Path
 import japanize_matplotlib
 
-def visualize_rules():
+def visualize_rules(data=None, rules_list=None, data_file=None):
     """上位ルールを可視化"""
     
     # データの読み込み
-    data_file = "data/processed/preprocessed_data_real.csv"
-    data = pd.read_csv(data_file)
+    if data is None:
+        if data_file is None:
+            data_file = "data/processed/preprocessed_data_real.csv"
+        data = pd.read_csv(data_file)
     
-    # 上位3ルールの定義（実データ用）
-    rules = [
-        {
-            'name': 'ルール1: 支出変動率 > 0.4 & 収入変動額 > 9万円',
-            'feature1': '支出変動率', 'threshold1': 0.4,
-            'feature2': '収入変動額', 'threshold2': 9.0,
-            'f1': 0.824, 'color': 'red', 'alpha': 0.2
-        },
-        {
-            'name': 'ルール2: 支出変動率 > 0.4 & 最高月収 > 35万円',
-            'feature1': '支出変動率', 'threshold1': 0.4,
-            'feature2': '最高月収', 'threshold2': 35.0,
-            'f1': 0.750, 'color': 'blue', 'alpha': 0.2
-        },
-        {
-            'name': 'ルール3: 最高支出 > 7.2万円 & 収入変動額 > 9万円',
-            'feature1': '最高支出', 'threshold1': 72.059,
-            'feature2': '収入変動額', 'threshold2': 9.0,
-            'f1': 0.727, 'color': 'green', 'alpha': 0.2
-        }
-    ]
+    # ルール定義
+    if rules_list is None or len(rules_list) == 0:
+        # デフォルトルール（後方互換性のため）
+        rules = [
+            {
+                'name': 'ルール1: 支出変動率 > 0.4 & 収入変動額 > 9万円',
+                'feature1': '支出変動率', 'threshold1': 0.4, 'operator1': '>',
+                'feature2': '収入変動額', 'threshold2': 9.0, 'operator2': '>',
+                'f1': 0.824, 'color': 'red', 'alpha': 0.2
+            },
+            {
+                'name': 'ルール2: 支出変動率 > 0.4 & 最高月収 > 35万円',
+                'feature1': '支出変動率', 'threshold1': 0.4, 'operator1': '>',
+                'feature2': '最高月収', 'threshold2': 35.0, 'operator2': '>',
+                'f1': 0.750, 'color': 'blue', 'alpha': 0.2
+            },
+            {
+                'name': 'ルール3: 最高支出 > 7.2万円 & 収入変動額 > 9万円',
+                'feature1': '最高支出', 'threshold1': 72.059, 'operator1': '>',
+                'feature2': '収入変動額', 'threshold2': 9.0, 'operator2': '>',
+                'f1': 0.727, 'color': 'green', 'alpha': 0.2
+            }
+        ]
+    else:
+        # 分析結果からルールを生成
+        rules = []
+        colors = ['red', 'blue', 'green']
+        for i, rule_data in enumerate(rules_list[:3]):
+            # ルール文字列から特徴量と条件を解析
+            condition = rule_data['rule_condition']
+            parts = condition.split(' AND ')
+            
+            # 特徴量1の解析
+            part1 = parts[0].strip()
+            if ' > ' in part1:
+                feature1, threshold1_str = part1.split(' > ')
+                operator1 = '>'
+            elif ' < ' in part1:
+                feature1, threshold1_str = part1.split(' < ')
+                operator1 = '<'
+            else:
+                continue
+            
+            # 特徴量2の解析
+            part2 = parts[1].strip()
+            if ' > ' in part2:
+                feature2, threshold2_str = part2.split(' > ')
+                operator2 = '>'
+            elif ' < ' in part2:
+                feature2, threshold2_str = part2.split(' < ')
+                operator2 = '<'
+            else:
+                continue
+            
+            rules.append({
+                'name': f'ルール{i+1}: {condition}',
+                'feature1': feature1.strip(),
+                'threshold1': float(threshold1_str.strip()),
+                'operator1': operator1,
+                'feature2': feature2.strip(), 
+                'threshold2': float(threshold2_str.strip()),
+                'operator2': operator2,
+                'f1': rule_data['f1_score'],
+                'color': colors[i % len(colors)],
+                'alpha': 0.2
+            })
     
     # 図の作成
     fig, axes = plt.subplots(1, 3, figsize=(20, 6))

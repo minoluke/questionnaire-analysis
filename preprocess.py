@@ -12,13 +12,15 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 
 from analysis.preprocessing import DataPreprocessor
 
-def main():
+def main(input_file=None, output_file=None):
     """前処理メイン実行関数"""
     print("=== データ前処理を開始します ===")
     
     # 設定
-    input_file = "data/raw/sprint_data - data.csv"
-    output_file = "data/processed/preprocessed_data_real.csv"
+    if input_file is None:
+        input_file = "data/raw/sprint_data - data.csv"
+    if output_file is None:
+        output_file = "data/processed/preprocessed_data_real.csv"
     target_column = "利用意向"
     
     # 前処理クラスの初期化
@@ -78,4 +80,10 @@ def main():
         print("前処理済みデータの保存に失敗しました")
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) >= 3:
+        main(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()

@@ -42,12 +42,22 @@ class SimpleRuleAnalyzer:
         
         return candidates
     
-    def evaluate_rule(self, data: pd.DataFrame, feature1: str, threshold1: float, 
-                     feature2: str, threshold2: float, target_column: str) -> Dict:
+    def evaluate_rule(self, data: pd.DataFrame, feature1: str, threshold1: float, operator1: str,
+                     feature2: str, threshold2: float, operator2: str, target_column: str) -> Dict:
         """ルールの評価"""
         try:
             # ルールの適用
-            rule_mask = (data[feature1] > threshold1) & (data[feature2] > threshold2)
+            if operator1 == '>':
+                condition1 = data[feature1] > threshold1
+            else:  # operator1 == '<'
+                condition1 = data[feature1] < threshold1
+                
+            if operator2 == '>':
+                condition2 = data[feature2] > threshold2
+            else:  # operator2 == '<'
+                condition2 = data[feature2] < threshold2
+                
+            rule_mask = condition1 & condition2
             
             # サンプル数の確認
             rule_samples = rule_mask.sum()
@@ -84,7 +94,7 @@ class SimpleRuleAnalyzer:
                 'threshold1': threshold1,
                 'feature2': feature2,
                 'threshold2': threshold2,
-                'rule_condition': f"{feature1} > {threshold1:.3f} AND {feature2} > {threshold2:.3f}",
+                'rule_condition': f"{feature1} {operator1} {threshold1:.3f} AND {feature2} {operator2} {threshold2:.3f}",
                 'rule_samples': rule_samples,
                 'other_samples': len(other_data),
                 'rule_intention_rate': rule_intention_rate,
@@ -131,18 +141,21 @@ class SimpleRuleAnalyzer:
             print(f"  {feature1}のしきい値候補: {len(thresholds1)}個")
             print(f"  {feature2}のしきい値候補: {len(thresholds2)}個")
             
-            # 全組み合わせの試行
-            for t1 in thresholds1:
-                for t2 in thresholds2:
-                    rule_result = self.evaluate_rule(data, feature1, t1, feature2, t2, target_column)
-                    
-                    if rule_result:
-                        all_rules.append(rule_result)
-                        
-                        # F1スコアで最良ルールを更新
-                        if rule_result['f1_score'] > best_f1:
-                            best_f1 = rule_result['f1_score']
-                            best_rule = rule_result
+            # 全組み合わせの試行（4つの演算子組み合わせ）
+            operators = ['>', '<']
+            for op1 in operators:
+                for op2 in operators:
+                    for t1 in thresholds1:
+                        for t2 in thresholds2:
+                            rule_result = self.evaluate_rule(data, feature1, t1, op1, feature2, t2, op2, target_column)
+                            
+                            if rule_result:
+                                all_rules.append(rule_result)
+                                
+                                # F1スコアで最良ルールを更新
+                                if rule_result['f1_score'] > best_f1:
+                                    best_f1 = rule_result['f1_score']
+                                    best_rule = rule_result
         
         self.best_rule = best_rule
         self.all_rules = all_rules

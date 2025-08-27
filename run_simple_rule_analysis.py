@@ -14,15 +14,19 @@ sys.path.append(str(Path(__file__).parent / 'src'))
 
 from analysis.simple_rule_analysis import SimpleRuleAnalyzer
 
-def main():
+def main(input_file=None, ranking_file=None, table_file=None, report_file=None):
     """簡易ルール分析メイン実行関数"""
     print("=== 簡易ルール分析（1本のif-else）を開始します ===")
     
-    # 前処理済みデータの読み込み
-    input_file = "data/processed/preprocessed_data_real.csv"
-    ranking_file = "output/tables/univariate_ranking_table.csv"
-    table_file = "output/tables/simple_rule_table.csv"
-    report_file = "output/reports/simple_rule_report.md"
+    # デフォルトパスの設定
+    if input_file is None:
+        input_file = "data/processed/preprocessed_data_real.csv"
+    if ranking_file is None:
+        ranking_file = "output/tables/univariate_ranking_table.csv"
+    if table_file is None:
+        table_file = "output/tables/simple_rule_table.csv"
+    if report_file is None:
+        report_file = "output/reports/simple_rule_report.md"
     
     print(f"入力ファイル: {input_file}")
     print(f"単変量分析結果: {ranking_file}")
@@ -115,13 +119,24 @@ def main():
         print(f"平均Lift: {rules_summary['avg_lift']:.3f}")
     
     # 上位ルールの表示
+    top_rules = []
     if rules_summary.get('top_rules'):
+        top_rules = rules_summary['top_rules']
         print(f"\n=== 上位5個のルール ===")
-        for i, rule in enumerate(rules_summary['top_rules'], 1):
+        for i, rule in enumerate(top_rules, 1):
             print(f"\n{i}. {rule['rule_condition']}")
             print(f"   F1スコア: {rule['f1_score']:.3f}")
             print(f"   利用意向率: {rule['rule_intention_rate']:.1%}")
             print(f"   サンプル数: {rule['rule_samples']}")
+    
+    # 可視化の実行
+    print("\n=== 可視化を生成中 ===")
+    try:
+        from visualize_rules import visualize_rules
+        visualize_rules(data, top_rules[:3])
+        print("可視化が完了しました: output/visualizations/rule_visualization.png")
+    except Exception as e:
+        print(f"可視化エラー: {e}")
 
 def generate_markdown_report(best_rule: dict, analyzer: SimpleRuleAnalyzer, 
                            data: pd.DataFrame, target_column: str, 
@@ -256,4 +271,14 @@ if (特徴量1 > t1) AND (特徴量2 > t2) then 利用意向=あり else なし
     return report
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) >= 5:
+        main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    elif len(sys.argv) == 4:
+        main(sys.argv[1], sys.argv[2], sys.argv[3])
+    elif len(sys.argv) == 3:
+        main(sys.argv[1], sys.argv[2])
+    elif len(sys.argv) == 2:
+        main(sys.argv[1])
+    else:
+        main()
