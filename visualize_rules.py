@@ -17,7 +17,7 @@ def visualize_rules():
     data_file = "data/processed/preprocessed_data_real.csv"
     data = pd.read_csv(data_file)
     
-    # 上位5ルールの定義
+    # 上位3ルールの定義（実データ用）
     rules = [
         {
             'name': 'ルール1: 支出変動率 > 0.4 & 収入変動額 > 9万円',
