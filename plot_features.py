@@ -37,17 +37,17 @@ def plot_feature_distributions(data_file=None, ranking_file=None, output_dir=Non
         (ranking_df['type'] == 'numerical') & 
         (ranking_df['feature'] != target_column) &
         (ranking_df['feature'] != 'user_id')
-    ].head(8)['feature'].tolist()
+    ]['feature'].tolist()  # 全特徴量を取得
     
     print(f"可視化対象特徴量: {top_features}")
     
     # 図のサイズとレイアウトを設定
     n_features = len(top_features)
-    n_cols = 3
+    n_cols = 4  # 列数を増やして全特徴量を表示
     n_rows = (n_features + n_cols - 1) // n_cols
     
     # 1. ヒストグラム（利用意向別）
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5*n_rows))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 5*n_rows))
     if n_features == 1:
         axes = [axes]
     elif n_rows == 1:
@@ -93,7 +93,7 @@ def plot_feature_distributions(data_file=None, ranking_file=None, output_dir=Non
     print(f"ヒストグラム保存: {hist_file}")
     
     # 2. ボックスプロット
-    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5*n_rows))
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(20, 5*n_rows))
     if n_features == 1:
         axes = [axes]
     elif n_rows == 1:
@@ -193,21 +193,21 @@ def plot_feature_distributions(data_file=None, ranking_file=None, output_dir=Non
     print(f"相関行列保存: {corr_file}")
     
     # 5. 特徴量重要度バープロット
-    plt.figure(figsize=(12, 6))
-    top_10_features = ranking_df.head(10)
+    plt.figure(figsize=(16, 8))
+    all_features_for_bar = ranking_df[ranking_df['feature'] != 'user_id']  # user_idを除外
     
-    bars = plt.bar(range(len(top_10_features)), top_10_features['importance_score'])
+    bars = plt.bar(range(len(all_features_for_bar)), all_features_for_bar['importance_score'])
     plt.xlabel('特徴量', fontsize=12)
     plt.ylabel('重要度スコア', fontsize=12)
-    plt.title('特徴量重要度ランキング（上位10個）', fontsize=14, fontweight='bold')
+    plt.title('特徴量重要度ランキング（全特徴量）', fontsize=14, fontweight='bold')
     
     # 特徴量名を斜めに表示
-    plt.xticks(range(len(top_10_features)), top_10_features['feature'], rotation=45, ha='right')
+    plt.xticks(range(len(all_features_for_bar)), all_features_for_bar['feature'], rotation=45, ha='right')
     
     # バーに数値を表示
-    for i, (bar, score) in enumerate(zip(bars, top_10_features['importance_score'])):
+    for i, (bar, score) in enumerate(zip(bars, all_features_for_bar['importance_score'])):
         plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
-                f'{score:.3f}', ha='center', va='bottom', fontsize=9)
+                f'{score:.3f}', ha='center', va='bottom', fontsize=8)
     
     plt.grid(True, alpha=0.3, axis='y')
     plt.tight_layout()
