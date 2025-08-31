@@ -35,8 +35,8 @@ def plot_usage_rate_for_mckinsey():
     # データ読み込み
     data = pd.read_csv("data/processed/preprocessed_100data.csv")
     
-    # 対象特徴量（収入変動額を削除）
-    features = ['支出変動率', '月収に対する自由資産率', '収入変動率']
+    # 対象特徴量（順序変更：支出変動率、収入変動率、自由資産率）
+    features = ['支出変動率', '収入変動率', '月収に対する自由資産率']
     
     # 出力ディレクトリの作成
     output_path = Path("output/mckinsey_slides")
@@ -98,12 +98,15 @@ def plot_usage_rate_for_mckinsey():
         
         # 軸設定（ラベルサイズ大）
         ax.set_xlabel(feature, fontsize=24, fontweight='bold')
-        ax.set_ylabel('利用意向率', fontsize=24, fontweight='bold')
         
-        # Y軸の範囲をデータに応じて調整
-        y_min = max(0, min(bin_stats['usage_rate']) - 0.05)
-        y_max = min(1, max(bin_stats['usage_rate']) + 0.1)
-        ax.set_ylim(y_min, y_max)
+        # Y軸ラベルは支出変動率のみ表示
+        if i == 0:  # 支出変動率のみ
+            ax.set_ylabel('利用意向率', fontsize=24, fontweight='bold')
+        else:  # 収入変動率と自由資産率はY軸の数値を非表示
+            ax.set_yticklabels([])
+        
+        # Y軸の範囲を0.1-0.6に統一
+        ax.set_ylim(0.1, 0.6)
         
         # グリッド追加（見やすさ向上）
         ax.grid(True, alpha=0.3, linestyle='--', linewidth=1)
@@ -127,7 +130,7 @@ def plot_usage_rate_for_mckinsey():
     # 保存（高解像度）
     output_file = output_path / "mckinsey_usage_rate_analysis.png"
     plt.savefig(output_file, dpi=300, bbox_inches='tight', facecolor='white', edgecolor='none')
-    plt.show()
+    plt.close()  # plt.show()の代わりにclose()を使用
     
     print(f"マッキンゼースライド用プロットを保存しました: {output_file}")
     
